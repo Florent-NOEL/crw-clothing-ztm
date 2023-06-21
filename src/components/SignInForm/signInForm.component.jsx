@@ -2,6 +2,7 @@ import Button from "../button.component/button.component";
 import { useState } from "react";
 import { signInWithGooglePopup, createUserDocumentFromAuth, signInUsingEmailAndPassword } from "../../utils/firebase/firebase.utils";
 import FormInput from "../form-input/form-input.component";
+import './signInForm.styles.scss';
 
 const defaultFormFields = {
     email: '',
@@ -19,9 +20,27 @@ const SignInForm = () => {
        const userDocRef = await createUserDocumentFromAuth(user);
     }
 
-    const handleSubmit = async () => {
-        const { user } = await signInUsingEmailAndPassword(email, password);
-       const userDocRef = await createUserDocumentFromAuth(user);
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+        const response = await signInUsingEmailAndPassword(email, password);
+        } catch (error){
+            switch(error.code)  {
+                case 'auth/user-not-found':
+                alert('incorrect password and email');
+                        break
+                case 'case auth/wrong-password':
+                    alert("incorrect password")
+                        break
+                case "auth/invalid-email":
+                    alert("wrong email")
+                        break;
+                default:
+                    console.log(error);
+            }
+        }
+        
+    
     }
 
     const handleChange = (event) => {
@@ -37,21 +56,24 @@ const SignInForm = () => {
      */
     
     return (
-        <div>
+        <div className="sign-up-container">
             <h1>
-                Sign In
+                Alredy have an account?
             </h1>
-            <form 
-            onSubmit={handleSubmit} >
+            <span>Sign in with your email and password</span>
+            <form
+                onSubmit={handleSubmit} >
                 <FormInput label='e-mail' type="e-mail" required onChange={handleChange} name="email" value={email} />
                 <FormInput label='Password' type="password" required onChange={handleChange} name="password" value={password} />
-                <Button type="submit">
-            Sign In
-            </Button>
+                <div className="buttons-container">
+                    <Button type="submit">
+                        Sign In
+                    </Button>
+                    <Button buttonType='google' tupe='button' onClick={logGoogleUser}>
+                        Sign in with Google
+                    </Button>
+                </div>
             </form>
-            <Button buttonType='google' onClick={logGoogleUser}>
-                Sign in with Google
-            </Button>
         </div>
     )
 }
